@@ -1,0 +1,17 @@
+<!-- app/views/qr_code/show.html.erb -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Generated QR Code</title>
+</head>
+<body>
+  <% if @error %>
+    <p><%= @error %></p>
+  <% else %>
+    <img src="data:image/png;base64,<%= Base64.encode64(@qr_code_data).gsub(/\n/, '') %>" alt="Generated QR Code">
+  <% end %>
+
+  <!-- Add a link to go back or any other necessary content -->
+
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!-- app/views/welcome/index.html.erb -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Welcome to TokenQRAuthApp</title>
+</head>
+<body>
+  <h1>Welcome to TokenQRAuthApp</h1>
+  
+  <p>This is a simple Rails application demonstrating token-based authentication and QR code login.</p>
+
+  <% if current_user %>
+    <!-- Display sign-out button when user is signed in -->
+    <p>
+      Welcome, <%= current_user.email %>!
+      <%= button_to 'Sign out', logout_path, method: :delete, data: { turbolinks: false } %>
+    </p>
+
+    <!-- Display QR code image when user is signed in -->
+ <button id="show-qrcode-btn">Show QR Code</button>
+
+  <!-- Container for the QR code -->
+  <div id="qrcode-container" style="display: none;">
+    <!-- Placeholder for the QR code image -->
+    <img id="qrcode-img" alt="QR Code">
+  </div>      <!-- Add an image tag to display the generated QR code -->
+  <% else %>
+    <!-- Display sign-in and sign-up buttons when user is not signed in -->
+    <p><a href="/login">Sign in</a></p>
+    <p><a href="/signup">Sign up</a></p>
+  <% end %>
+
+    <button id="open-scanner-btn">Open Scanner</button>
+
+ <div id="scanner-container" style="display: none;">
+    <video id="scanner"></video>
+  </div>
+
+  <!-- Script to initialize the QR code scanner -->
+  <script>
+   document.addEventListener('DOMContentLoaded', function () {
+      // Function to show the QR code
+      function showQRCode() {
+        // Hide the button
+        document.getElementById('show-qrcode-btn').style.display = 'none';
+
+        // Display the QR code container
+        document.getElementById('qrcode-container').style.display = 'block';
+
+        // Generate the QR code image URL
+        var qrCodeUrl = '<%= generate_qr_code_path(token: current_user) %>';
+
+        // Set the QR code image source
+        document.getElementById('qrcode-img').src = qrCodeUrl;
+      }
+
+      // Event listener for the button click
+      document.getElementById('show-qrcode-btn').addEventListener('click', showQRCode);
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+  var scanner = new Instascan.Scanner({ video: document.getElementById('scanner') });
+  var currentCameraIndex = 0; // Index to keep track of the current camera
+
+  // Function to open the scanner
+  function openScanner() {
+    document.getElementById('scanner-container').style.display = 'block';
+    document.getElementById('open-scanner-btn').style.display = 'none';
+
+    // Start the scanner
+    Instascan.Camera.getCameras().then(function (cameras) {
+      if (cameras.length > 0) {
+        scanner.start(cameras[currentCameraIndex]);
+        // Add button to switch cameras
+        addCameraSwitchButton(cameras);
+      } else {
+        console.error('No cameras found.');
+      }
+    }).catch(function (e) {
+      console.error(e);
+    });
+  }
+
+  // Function to add a button for camera switch
+  function addCameraSwitchButton(cameras) {
+    var switchCameraBtn = document.createElement('button');
+    switchCameraBtn.textContent = 'Switch Camera';
+    switchCameraBtn.addEventListener('click', function () {
+      // Switch to the next camera
+      currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
+      scanner.stop(); // Stop the current scanner
+      scanner.start(cameras[currentCameraIndex]); // Start the scanner with the new camera
+    });
+    document.getElementById('scanner-container').appendChild(switchCameraBtn);
+  }
+
+  // Event listener for the button click
+  document.getElementById('open-scanner-btn').addEventListener('click', openScanner);
+
+  scanner.addListener('scan', function (content) {
+    // Redirect to the scanned URL
+    window.location.href = content;
+  });
+});
+
+  </script>
+</body>
+</html>

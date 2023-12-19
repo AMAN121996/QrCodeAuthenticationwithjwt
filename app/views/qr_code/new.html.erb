@@ -1,0 +1,11 @@
+<!-- app/views/qr_code/new.html.erb -->
+<h1>Generate QR Code</h1>
+
+<%= form_tag '/qr_code', method: 'get' do %>
+  <div>
+    <%= label_tag 'Token' %>
+    <%= text_field_tag 'token' %>
+  </div>
+
+  <%= submit_tag 'Generate QR Code' %>
+<% end %>
